@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art ASCII Matrice - Dedicace Music System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #ff69b4;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Effet de scanlines */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(255, 105, 180, 0.03) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Effet de chute de code matrice */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .terminal-header {
+            width: 100%;
+            background: #1a0011;
+            padding: 8px 15px;
+            border-bottom: 2px solid #ff69b4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+            z-index: 10;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .terminal-title {
+            font-size: clamp(10px, 3vw, 14px);
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff69b4;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .status {
+            font-size: clamp(8px, 2vw, 12px);
+            padding: 2px 6px;
+            background: #330022;
+            border: 1px solid #ff69b4;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+
+        .orbit-container {
+            position: relative;
+            width: 85vmin;
+            height: 85vmin;
+            max-width: 600px;
+            max-height: 600px;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .rotating-content {
+            position: absolute;
+            transform-origin: center;
+            background: rgba(20, 0, 11, 0.9);
+            border: 1px solid #ff69b4;
+            border-radius: 8px;
+            box-shadow: 
+                0 0 30px rgba(255, 105, 180, 0.5),
+                inset 0 0 20px rgba(255, 105, 180, 0.1);
+            padding: 10px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 90%;
+            height: 90%;
+        }
+
+        .pixel-art-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .pixel-art {
+            max-width: 100%;
+            max-height: 100%;
+            filter: brightness(1.2) contrast(1.1) hue-rotate(300deg) saturate(1.5);
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        /* Style pour l'effet matrice sur l'image */
+        .matrix-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .matrix-char {
+            position: absolute;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            color: #ff69b4;
+            text-shadow: 0 0 5px #ff69b4;
+            animation: matrix-fall linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes matrix-fall {
+            0% {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            5% {
+                opacity: 1;
+            }
+            95% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(1000%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes orbit-rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .control-panel {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            background: rgba(20, 0, 11, 0.9);
+            border: 1px solid #ff69b4;
+            border-radius: 8px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+            z-index: 50;
+            max-width: 95%;
+            overflow-x: auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            background: #220011;
+            color: #ff69b4;
+            border: 1px solid #ff69b4;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(8px, 2.5vw, 12px);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #ff69b4;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .control-btn:hover {
+            background: #ff69b4;
+            color: #110022;
+            box-shadow: 0 0 15px #ff69b4;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
+            }
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 100px;
+            right: 10px;
+            background: rgba(20, 0, 11, 0.8);
+            border: 1px solid #ff69b4;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: clamp(8px, 2vw, 10px);
+            color: #ff69b4;
+            z-index: 5;
+            max-width: 150px;
+        }
+
+        /* Lecteur musical amélioré */
+        .music-player {
+            position: fixed;
+            top: 100px;
+            left: 10px;
+            background: rgba(20, 0, 11, 0.9);
+            border: 1px solid #ff69b4;
+            border-radius: 8px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+            z-index: 5;
+            width: calc(100% - 20px);
+            max-width: 320px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .music-title {
+            font-size: clamp(10px, 3vw, 12px);
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 0 5px #ff69b4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .music-controls {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .music-btn {
+            background: #220011;
+            color: #ff69b4;
+            border: 1px solid #ff69b4;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(10px, 3vw, 12px);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #ff69b4;
+        }
+
+        .music-btn:hover {
+            background: #ff69b4;
+            color: #110022;
+            box-shadow: 0 0 10px #ff69b4;
+        }
+
+        .music-btn.active {
+            background: #ff69b4;
+            color: #110022;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #330022;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .progress {
+            height: 100%;
+            background: #ff69b4;
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 5px #ff69b4;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(8px, 2vw, 10px);
+            margin-bottom: 8px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            background: #330022;
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ff69b4;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px #ff69b4;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #ff69b4;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px #ff69b4;
+            border: none;
+        }
+
+        .playlist-container {
+            max-height: 100px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            border: 1px solid #330022;
+            border-radius: 4px;
+            background: rgba(10, 0, 5, 0.5);
+        }
+
+        .playlist-item {
+            padding: 6px;
+            font-size: clamp(8px, 2vw, 10px);
+            cursor: pointer;
+            border-bottom: 1px solid #330022;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255, 105, 180, 0.1);
+        }
+
+        .playlist-item.active {
+            background: rgba(255, 105, 180, 0.2);
+            border-left: 3px solid #ff69b4;
+        }
+
+        .visualizer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 20px;
+            margin-top: 8px;
+            gap: 2px;
+        }
+
+        .bar {
+            flex: 1;
+            background: #ff69b4;
+            min-height: 2px;
+            animation: dance 0.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 3px #ff69b4;
+        }
+
+        @keyframes dance {
+            0% { height: 2px; }
+            100% { height: 20px; }
+        }
+
+        .bar:nth-child(2) { animation-delay: 0.1s; }
+        .bar:nth-child(3) { animation-delay: 0.2s; }
+        .bar:nth-child(4) { animation-delay: 0.3s; }
+        .bar:nth-child(5) { animation-delay: 0.4s; }
+        .bar:nth-child(6) { animation-delay: 0.3s; }
+        .bar:nth-child(7) { animation-delay: 0.2s; }
+        .bar:nth-child(8) { animation-delay: 0.1s; }
+
+        /* Overlay de démarrage */
+        .start-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            padding: 20px;
+        }
+
+        .start-message {
+            color: #ff69b4;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(14px, 5vw, 18px);
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #ff69b4;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .start-btn {
+            background: #220011;
+            color: #ff69b4;
+            border: 2px solid #ff69b4;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(14px, 4vw, 16px);
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #ff69b4;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .start-btn:hover {
+            background: #ff69b4;
+            color: #110022;
+            box-shadow: 0 0 30px #ff69b4;
+            transform: scale(1.05);
+        }
+
+        .loading-indicator {
+            color: #ff69b4;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(10px, 3vw, 12px);
+            margin-top: 15px;
+        }
+
+        .repo-info {
+            position: fixed;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 0, 11, 0.9);
+            border: 1px solid #ff69b4;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: clamp(8px, 2vw, 10px);
+            color: #ff69b4;
+            z-index: 5;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .orbit-container {
+                width: 80vmin;
+                height: 80vmin;
+                max-width: 400px;
+                max-height: 400px;
+            }
+            
+            .control-panel {
+                bottom: 5px;
+                padding: 8px;
+                gap: 3px;
+            }
+
+            .music-player {
+                top: 85px;
+                left: 5px;
+                right: 5px;
+                width: calc(100% - 10px);
+                max-width: none;
+            }
+
+            .debug-info {
+                display: none;
+            }
+
+            .status-indicators {
+                gap: 5px;
+            }
+
+            .status {
+                font-size: 8px;
+                padding: 1px 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .orbit-container {
+                width: 70vmin;
+                height: 70vmin;
+                max-width: 300px;
+                max-height: 300px;
+            }
+
+            .control-panel {
+                bottom: 0;
+                left: 0;
+                right: 0;
+                transform: none;
+                border-radius: 8px 8px 0 0;
+                max-width: 100%;
+            }
+
+            .music-player {
+                top: 75px;
+                max-height: 50vh;
+            }
+
+            .terminal-header {
+                padding: 5px 10px;
+            }
+
+            .start-btn {
+                padding: 10px 20px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 600px) {
+            .orbit-container {
+                width: 50vmin;
+                height: 50vmin;
+            }
+
+            .music-player {
+                top: 60px;
+                max-height: 40vh;
+            }
+
+            .control-panel {
+                bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay de démarrage -->
+    <div class="start-overlay" id="startOverlay">
+        <div class="start-message">
+            DEDICACE MUSIC SYSTEM<br>
+            ♪ Playlist depuis GitHub ♪<br>
+            <span style="font-size: clamp(12px, 4vw, 14px);">Cliquez pour démarrer l'expérience</span>
+        </div>
+        <button class="start-btn" id="startBtn">▶ DÉMARRER</button>
+        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+            Chargement de la playlist...
+        </div>
+    </div>
+
+    <div class="matrix-rain" id="matrixRain"></div>
+    
+    <div class="terminal-header">
+        <div class="terminal-title">DEDICACE MUSIC SYSTEM // GITHUB INTEGRATION</div>
+        <div class="status-indicators">
+            <div class="status">MATRICE: ACTIVE</div>
+            <div class="status">SYNC: STABLE</div>
+            <div class="status">PWR: 100%</div>
+        </div>
+    </div>
+
+    <!-- Info du dépôt -->
+    <div class="repo-info">
+        📁 Dépôt: github.com/gunout/Dedicace
+    </div>
+
+    <!-- Lecteur musical -->
+    <div class="music-player">
+        <div class="music-title" id="musicTitle">♪ Chargement de la playlist... ♪</div>
+        
+        <div class="playlist-container" id="playlistContainer">
+            <!-- La playlist sera générée dynamiquement -->
+        </div>
+        
+        <div class="music-controls">
+            <button class="music-btn" id="musicPrev">⏮</button>
+            <button class="music-btn" id="musicPlayPause">▶</button>
+            <button class="music-btn" id="musicNext">⏭</button>
+        </div>
+        <div class="progress-bar" id="progressBar">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="time-display">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
+        </div>
+        <div class="volume-control">
+            <span style="font-size: clamp(8px, 2vw, 10px);">🔊</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="80">
+            <span id="volumeValue" style="font-size: clamp(8px, 2vw, 10px);">80%</span>
+        </div>
+        <div class="visualizer" id="visualizer">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+    </div>
+
+    <div class="debug-info" id="debugInfo">
+        VITESSE: 20s<br>
+        DIRECTION: NORMAL<br>
+        STATUT: ACTIF
+    </div>
+
+    <div class="orbit-container" id="orbitContainer">
+        <div class="rotating-content pulse">
+            <div class="pixel-art-container">
+                <!-- Image DAWGZ.png avec effet rose -->
+                <img src="https://z-cdn-media.chatglm.cn/files/2ea87cdd-23fd-4406-9b4e-4c47eca62dc8_DAWGZ.png?auth_key=1792951072-4eda788086944ce3be7413996dbdf012-0-8635ab0aeebb9d07ed386d39ba8d43dd" alt="Pixel Art" class="pixel-art" id="pixelArt">
+                <div class="matrix-overlay" id="matrixOverlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="control-panel">
+        <button class="control-btn" id="speedUp">ACCÉLÉRER ++</button>
+        <button class="control-btn" id="slowDown">RALENTIR --</button>
+        <button class="control-btn" id="reverse">INVERSER ↻</button>
+        <button class="control-btn" id="togglePlayPause">PAUSE ▐▐</button>
+        <button class="control-btn" id="reset">RÉINITIALISER ↺</button>
+        <button class="control-btn" id="toggleMatrix">MATRICE ON/OFF</button>
+    </div>
+
+    <!-- Élément audio -->
+    <audio id="audioPlayer" preload="auto" crossorigin="anonymous"></audio>
+    
+    <script>
+        const orbitContainer = document.getElementById('orbitContainer');
+        const speedUpBtn = document.getElementById('speedUp');
+        const slowDownBtn = document.getElementById('slowDown');
+        const reverseBtn = document.getElementById('reverse');
+        const togglePlayPauseBtn = document.getElementById('togglePlayPause');
+        const resetBtn = document.getElementById('reset');
+        const toggleMatrixBtn = document.getElementById('toggleMatrix');
+        const debugInfo = document.getElementById('debugInfo');
+        const rotatingContent = document.querySelector('.rotating-content');
+        const pixelArt = document.getElementById('pixelArt');
+        const matrixOverlay = document.getElementById('matrixOverlay');
+        const matrixRain = document.getElementById('matrixRain');
+
+        // Éléments du lecteur musical
+        const audioPlayer = document.getElementById('audioPlayer');
+        const musicPlayPauseBtn = document.getElementById('musicPlayPause');
+        const musicPrevBtn = document.getElementById('musicPrev');
+        const musicNextBtn = document.getElementById('musicNext');
+        const progressBar = document.getElementById('progressBar');
+        const progress = document.getElementById('progress');
+        const currentTimeSpan = document.getElementById('currentTime');
+        const durationSpan = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const visualizer = document.getElementById('visualizer');
+        const musicTitle = document.getElementById('musicTitle');
+        const playlistContainer = document.getElementById('playlistContainer');
+
+        // Éléments de démarrage
+        const startOverlay = document.getElementById('startOverlay');
+        const startBtn = document.getElementById('startBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        let animationSpeed = 20;
+        let isReversed = false;
+        let isPaused = false;
+        let matrixEnabled = true;
+        let isMusicPlaying = false;
+        let progressInterval = null;
+        let systemStarted = false;
+        let audioContext = null;
+        let userInteracted = false;
+
+        // 🎵 PLAYLIST METTRE À JOURRE ICI 🎵
+        // Ajoutez votre nouvelle chanson dans cette playlist
+        const playlist = [
+            {
+                title: "Luc Leandry - Je me noie dans tes yeux",
+                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/Luc%20Leandry%20-%20Je%20me%20noie%20dans%20tes%20yeux.mp3"
+            },
+            // 🎵 AJOUTEZ VOTRE NOUVELLE CHANSON ICI 🎵
+            // Remplacez les informations ci-dessous par votre nouvelle chanson
+            {
+             title: "Luc Leandry - Bienglace", // 🎵 REMPLACEZ CE TITRE
+             url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/Luc%20Leandry%20-%20Bienglace.mp3" // 🎵 REMPLACEZ CETTE URL
+            }
+            // Vous pouvez ajouter d'autres chansons ici en suivant le même format
+        ];
+        let currentTrackIndex = 0;
+
+        // Caractères pour l'effet matrice
+        const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン♥♡';
+
+        // Initialiser l'Audio Context
+        function initAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                return true;
+            } catch (error) {
+                console.error('Erreur Audio Context:', error);
+                return false;
+            }
+        }
+
+        // Créer la playlist UI
+        function createPlaylistUI() {
+            playlistContainer.innerHTML = '';
+            playlist.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'playlist-item';
+                if (index === currentTrackIndex) {
+                    item.classList.add('active');
+                }
+                item.textContent = `${index + 1}. ${track.title}`;
+                item.addEventListener('click', () => {
+                    loadTrack(index);
+                    if (!isMusicPlaying) {
+                        toggleMusicPlayPause();
+                    }
+                });
+                playlistContainer.appendChild(item);
+            });
+        }
+
+        // Fonction pour créer l'effet matrice sur l'image
+        function createMatrixEffect() {
+            matrixOverlay.innerHTML = '';
+            
+            if (!matrixEnabled) return;
+            
+            const containerWidth = pixelArt.offsetWidth;
+            const containerHeight = pixelArt.offsetHeight;
+            const charCount = Math.floor((containerWidth * containerHeight) / 600);
+            
+            for (let i = 0; i < charCount; i++) {
+                const char = document.createElement('div');
+                char.className = 'matrix-char';
+                char.textContent = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+                
+                const left = Math.random() * containerWidth;
+                const top = Math.random() * containerHeight;
+                
+                char.style.left = `${left}px`;
+                char.style.top = `${top}px`;
+                char.style.animationDuration = `${0.5 + Math.random() * 2}s`;
+                char.style.animationDelay = `${Math.random() * 5}s`;
+                
+                matrixOverlay.appendChild(char);
+            }
+        }
+
+        // Fonction pour créer l'effet de pluie de code en arrière-plan
+        function createMatrixRain() {
+            const characters = matrixChars;
+            const columns = Math.floor(window.innerWidth / 25);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.style.position = 'absolute';
+                column.style.top = '-100px';
+                column.style.left = (i * 25) + 'px';
+                column.style.width = '25px';
+                column.style.fontFamily = 'Courier New', monospace;
+                column.style.fontSize = '16px';
+                column.style.color = '#ff69b4';
+                column.style.textShadow = '0 0 5px #ff69b4';
+                column.style.animation = `matrix-fall ${3 + Math.random() * 5}s linear infinite`;
+                column.style.animationDelay = `${Math.random() * 5}s`;
+                column.style.opacity = '0.7';
+                
+                let content = '';
+                const length = 15 + Math.floor(Math.random() * 25);
+                for (let j = 0; j < length; j++) {
+                    content += characters[Math.floor(Math.random() * characters.length)] + '<br>';
+                }
+                
+                column.innerHTML = content;
+                matrixRain.appendChild(column);
+            }
+        }
+
+        function updateAnimation() {
+            orbitContainer.style.animation = 'none';
+            void orbitContainer.offsetWidth;
+            
+            orbitContainer.style.animation = `orbit-rotation ${animationSpeed}s ${isReversed ? 'reverse' : 'normal'} linear ${isPaused ? 'paused' : 'running'}`;
+            
+            updateDebugInfo();
+        }
+
+        function updateDebugInfo() {
+            debugInfo.innerHTML = `
+                VITESSE: ${animationSpeed}s<br>
+                DIRECTION: ${isReversed ? 'INVERSE' : 'NORMAL'}<br>
+                STATUT: ${isPaused ? 'PAUSE' : 'ACTIF'}<br>
+                MATRICE: ${matrixEnabled ? 'ACTIVE' : 'INACTIVE'}<br>
+                MUSIQUE: ${isMusicPlaying ? '▶ LECTURE' : '⏸ PAUSE'}<br>
+                TITRE: ${currentTrackIndex + 1}/${playlist.length}
+            `;
+        }
+
+        function updatePulseEffect() {
+            if (isPaused) {
+                rotatingContent.classList.remove('pulse');
+            } else {
+                rotatingContent.classList.add('pulse');
+            }
+        }
+
+        function toggleMatrixEffect() {
+            matrixEnabled = !matrixEnabled;
+            if (matrixEnabled) {
+                createMatrixEffect();
+                matrixRain.style.display = 'block';
+            } else {
+                matrixOverlay.innerHTML = '';
+                matrixRain.style.display = 'none';
+            }
+            toggleMatrixBtn.textContent = matrixEnabled ? 'MATRICE OFF' : 'MATRICE ON';
+            updateDebugInfo();
+        }
+
+        // Fonctions du lecteur musical
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        async function toggleMusicPlayPause() {
+            if (!userInteracted) {
+                return;
+            }
+
+            try {
+                if (isMusicPlaying) {
+                    audioPlayer.pause();
+                    musicPlayPauseBtn.textContent = '▶';
+                    musicPlayPauseBtn.classList.remove('active');
+                    visualizer.style.display = 'none';
+                    stopProgressUpdate();
+                } else {
+                    if (audioContext && audioContext.state === 'suspended') {
+                        await audioContext.resume();
+                    }
+                    
+                    const playPromise = audioPlayer.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            musicPlayPauseBtn.textContent = '⏸';
+                            musicPlayPauseBtn.classList.add('active');
+                            visualizer.style.display = 'flex';
+                            startProgressUpdate();
+                            isMusicPlaying = true;
+                            updateDebugInfo();
+                        }).catch(error => {
+                            console.error('Erreur lecture audio:', error);
+                        });
+                    }
+                }
+                isMusicPlaying = !isMusicPlaying;
+            } catch (error) {
+                console.error('Erreur toggle:', error);
+            }
+        }
+
+        function startProgressUpdate() {
+            stopProgressUpdate();
+            progressInterval = setInterval(() => {
+                if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
+                    const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                    progress.style.width = `${progressPercent}%`;
+                    currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
+                    durationSpan.textContent = formatTime(audioPlayer.duration);
+                }
+            }, 100);
+        }
+
+        function stopProgressUpdate() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+        }
+
+        function loadTrack(index) {
+            if (index >= 0 && index < playlist.length) {
+                currentTrackIndex = index;
+                audioPlayer.src = playlist[index].url;
+                musicTitle.textContent = `♪ ${playlist[index].title} ♪`;
+                
+                // Mettre à jour la playlist UI
+                document.querySelectorAll('.playlist-item').forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                if (isMusicPlaying) {
+                    toggleMusicPlayPause();
+                    setTimeout(() => toggleMusicPlayPause(), 100);
+                }
+            }
+        }
+
+        // Démarrage du système
+        async function startSystem() {
+            systemStarted = true;
+            userInteracted = true;
+            startOverlay.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            
+            initAudioContext();
+            
+            // Créer la playlist
+            createPlaylistUI();
+            
+            // Initialiser les effets visuels
+            createMatrixEffect();
+            createMatrixRain();
+            updateAnimation();
+            updatePulseEffect();
+            
+            // Initialiser le lecteur audio
+            audioPlayer.volume = 0.8;
+            visualizer.style.display = 'none';
+            
+            // Charger la première piste
+            if (playlist.length > 0) {
+                loadTrack(0);
+            }
+            
+            // Précharger l'audio
+            try {
+                await audioPlayer.load();
+                
+                setTimeout(async () => {
+                    loadingIndicator.style.display = 'none';
+                    try {
+                        await audioPlayer.play();
+                        isMusicPlaying = true;
+                        musicPlayPauseBtn.textContent = '⏸';
+                        musicPlayPauseBtn.classList.add('active');
+                        visualizer.style.display = 'flex';
+                        startProgressUpdate();
+                        updateDebugInfo();
+                    } catch (error) {
+                        updateDebugInfo();
+                    }
+                }, 1000);
+            } catch (error) {
+                loadingIndicator.textContent = 'Erreur de chargement audio';
+                setTimeout(() => {
+                    loadingIndicator.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Événements du lecteur musical
+        musicPlayPauseBtn.addEventListener('click', toggleMusicPlayPause);
+
+        musicPrevBtn.addEventListener('click', () => {
+            if (currentTrackIndex > 0) {
+                loadTrack(currentTrackIndex - 1);
+            } else {
+                loadTrack(playlist.length - 1);
+            }
+        });
+
+        musicNextBtn.addEventListener('click', () => {
+            if (currentTrackIndex < playlist.length - 1) {
+                loadTrack(currentTrackIndex + 1);
+            } else {
+                loadTrack(0);
+            }
+        });
+
+        audioPlayer.addEventListener('loadedmetadata', () => {
+            durationSpan.textContent = formatTime(audioPlayer.duration);
+        });
+
+        audioPlayer.addEventListener('timeupdate', () => {
+            if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
+                const progressPercent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progress.style.width = `${progressPercent}%`;
+                currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
+            }
+        });
+
+        progressBar.addEventListener('click', (e) => {
+            if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
+                const rect = progressBar.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                audioPlayer.currentTime = percent * audioPlayer.duration;
+            }
+        });
+
+        volumeSlider.addEventListener('input', (e) => {
+            const volume = e.target.value;
+            audioPlayer.volume = volume / 100;
+            volumeValue.textContent = `${volume}%`;
+        });
+
+        audioPlayer.addEventListener('ended', () => {
+            // Passer automatiquement au titre suivant
+            if (currentTrackIndex < playlist.length - 1) {
+                loadTrack(currentTrackIndex + 1);
+                setTimeout(() => toggleMusicPlayPause(), 500);
+            } else {
+                loadTrack(0);
+                setTimeout(() => toggleMusicPlayPause(), 500);
+            }
+        });
+
+        audioPlayer.addEventListener('error', (e) => {
+            console.error('Erreur audio:', e.target.error);
+        });
+
+        // Événements de démarrage
+        startBtn.addEventListener('click', startSystem);
+
+        // Événements des contrôles principaux
+        speedUpBtn.addEventListener('click', () => {
+            if (animationSpeed > 3) {
+                animationSpeed -= 2;
+                updateAnimation();
+            }
+        });
+
+        slowDownBtn.addEventListener('click', () => {
+            animationSpeed += 2;
+            updateAnimation();
+        });
+
+        reverseBtn.addEventListener('click', () => {
+            isReversed = !isReversed;
+            updateAnimation();
+        });
+
+        togglePlayPauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            togglePlayPauseBtn.textContent = isPaused ? 'PLAY ►' : 'PAUSE ▐▐';
+            updateAnimation();
+            updatePulseEffect();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            animationSpeed = 20;
+            isReversed = false;
+            isPaused = false;
+            togglePlayPauseBtn.textContent = 'PAUSE ▐▐';
+            updateAnimation();
+            updatePulseEffect();
+        });
+
+        toggleMatrixBtn.addEventListener('click', toggleMatrixEffect);
+
+        // Détecter les interactions utilisateur
+        document.addEventListener('click', () => {
+            if (!userInteracted) {
+                userInteracted = true;
+            }
+        }, { once: true });
+
+        document.addEventListener('keydown', () => {
+            if (!userInteracted) {
+                userInteracted = true;
+            }
+        }, { once: true });
+
+        // Redimensionnement de la matrice quand la fenêtre change
+        window.addEventListener('resize', () => {
+            matrixRain.innerHTML = '';
+            createMatrixRain();
+            createMatrixEffect();
+        });
+
+        // Optimisation pour mobile
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+        }
+    </script>
+</body>
+</html>
