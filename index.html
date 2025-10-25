@@ -772,15 +772,15 @@
             sources: [
                 {
                     name: "jsDelivr",
-                    baseUrl: "https://cdn.jsdelivr.net/gh/gunout/Gleaphe-Instrus@main/music/"
+                    baseUrl: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/"
                 },
                 {
                     name: "Statically",
-                    baseUrl: "https://cdn.statically.io/gh/gunout/Gleaphe-Instrus/main/music/"
+                    baseUrl: "https://cdn.statically.io/gh/gunout/Dedicace/main/music/"
                 },
                 {
                     name: "RawGit",
-                    baseUrl: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/"
+                    baseUrl: "https://raw.githubusercontent.com/gunout/Dedicace/main/music/"
                 }
             ],
             currentSourceIndex: 0
@@ -845,32 +845,38 @@
         let retryCount = 0;
         let maxRetries = 3;
 
-        // 🎵 PLAYLIST - VOS CHANSONS WEST COST
+        // 🎵 PLAYLIST - VOS CHANSONS WEST COST (CORRIGÉE)
         const playlist = [
             {
                 title: "West Cost 70",
-                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/West%20Cost%2070.mp3"
+                filename: "West%20Cost%2070.mp3",
+                available: true
             },
             {
                 title: "West Cost 71",
-                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/West%20Cost%2071.mp3"
+                filename: "West%20Cost%2071.mp3",
+                available: true
             },
             {
                 title: "West Cost 72",
-                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/West%20Cost%2072.mp3"
+                filename: "West%20Cost%2072.mp3",
+                available: true
             },
             {
                 title: "West Cost 73",
-                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/West%20Cost%2073.mp3"
+                filename: "West%20Cost%2073.mp3",
+                available: true
             },
             {
                 title: "West Cost 74",
-                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/West%20Cost%2074.mp3"
+                filename: "West%20Cost%2074.mp3",
+                available: true
             },
             {
                 title: "West Cost 75",
-                url: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/West%20Cost%2075.mp3"
-            },
+                filename: "West%20Cost%2075.mp3",
+                available: true
+            }
         ];
 
         let currentTrackIndex = 0;
@@ -893,7 +899,7 @@
             
             // Recharger les URLs de la playlist
             playlist.forEach(track => {
-                if (track.available) {
+                if (track.available && !track.isLocal) {
                     track.url = getCurrentTrackUrl(track);
                 }
             });
@@ -1176,7 +1182,7 @@
                 currentTrackIndex = index;
                 const track = playlist[index];
                 
-                if (!track.url) {
+                if (!track.url && !track.isLocal) {
                     track.url = getCurrentTrackUrl(track);
                 }
                 
@@ -1184,15 +1190,17 @@
                 updateStatus('Chargement...', false);
                 
                 // Vérifier si l'URL est accessible
-                const isUrlValid = await checkUrl(track.url);
-                if (!isUrlValid && !isRetry) {
-                    console.warn('URL non valide, tentative avec autre source...');
-                    const success = await retryWithDifferentSource();
-                    if (!success) {
-                        track.available = false;
-                        createPlaylistUI();
-                        showError('Fichier non disponible');
-                        return;
+                if (!track.isLocal) {
+                    const isUrlValid = await checkUrl(track.url);
+                    if (!isUrlValid && !isRetry) {
+                        console.warn('URL non valide, tentative avec autre source...');
+                        const success = await retryWithDifferentSource();
+                        if (!success) {
+                            track.available = false;
+                            createPlaylistUI();
+                            showError('Fichier non disponible');
+                            return;
+                        }
                     }
                 }
                 
@@ -1213,7 +1221,7 @@
                     updateStatus('Prêt', false);
                 } catch (error) {
                     console.error('Erreur chargement:', error);
-                    if (!isRetry) {
+                    if (!isRetry && !track.isLocal) {
                         await retryWithDifferentSource();
                     } else {
                         track.available = false;
@@ -1427,13 +1435,15 @@
 
         audioPlayer.addEventListener('error', async (e) => {
             console.error('Erreur audio:', e.target.error);
-            const success = await retryWithDifferentSource();
-            if (!success) {
-                if (playlist[currentTrackIndex]) {
-                    playlist[currentTrackIndex].available = false;
-                    createPlaylistUI();
+            if (!playlist[currentTrackIndex].isLocal) {
+                const success = await retryWithDifferentSource();
+                if (!success) {
+                    if (playlist[currentTrackIndex]) {
+                        playlist[currentTrackIndex].available = false;
+                        createPlaylistUI();
+                    }
+                    showError('Fichier audio non disponible');
                 }
-                showError('Fichier audio non disponible');
             }
         });
 
