@@ -93,13 +93,6 @@
             white-space: nowrap;
         }
 
-        .status.error {
-            background: #330011;
-            border-color: #ff4444;
-            color: #ff4444;
-            animation: blink 1s infinite;
-        }
-
         .orbit-container {
             position: relative;
             width: 85vmin;
@@ -188,11 +181,6 @@
             }
         }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
         @keyframes orbit-rotation {
             0% {
                 transform: rotate(0deg);
@@ -241,11 +229,6 @@
             background: #ff69b4;
             color: #110022;
             box-shadow: 0 0 15px #ff69b4;
-        }
-
-        .control-btn.active {
-            background: #ff69b4;
-            color: #110022;
         }
 
         .pulse {
@@ -425,11 +408,6 @@
             border-left: 3px solid #ff69b4;
         }
 
-        .playlist-item.error {
-            color: #ff4444;
-            opacity: 0.6;
-        }
-
         .visualizer {
             display: flex;
             justify-content: space-between;
@@ -487,6 +465,11 @@
             animation: blink 1.5s infinite;
         }
 
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         .start-btn {
             background: #220011;
             color: #ff69b4;
@@ -529,37 +512,6 @@
             z-index: 5;
             text-align: center;
             white-space: nowrap;
-        }
-
-        .download-section {
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .upload-section {
-            margin-top: 10px;
-            text-align: center;
-            padding: 8px;
-            border: 1px dashed #ff69b4;
-            border-radius: 4px;
-            background: rgba(255, 105, 180, 0.05);
-        }
-
-        .upload-btn {
-            background: #220011;
-            color: #ff69b4;
-            border: 1px solid #ff69b4;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: clamp(8px, 2vw, 10px);
-            transition: all 0.3s ease;
-        }
-
-        .upload-btn:hover {
-            background: #ff69b4;
-            color: #110022;
         }
 
         /* Responsive */
@@ -628,14 +580,6 @@
             .start-btn {
                 padding: 10px 20px;
             }
-
-            .playlist-container {
-                max-height: 80px;
-            }
-
-            .visualizer {
-                height: 15px;
-            }
         }
 
         @media (orientation: landscape) and (max-height: 600px) {
@@ -660,7 +604,7 @@
     <div class="start-overlay" id="startOverlay">
         <div class="start-message">
             DEDICACE MUSIC SYSTEM<br>
-            ♪ Playlist Multi-Source ♪<br>
+            ♪ GitHub Pages Edition ♪<br>
             <span style="font-size: clamp(12px, 4vw, 14px);">Cliquez pour démarrer l'expérience</span>
         </div>
         <button class="start-btn" id="startBtn">▶ DÉMARRER</button>
@@ -672,22 +616,22 @@
     <div class="matrix-rain" id="matrixRain"></div>
     
     <div class="terminal-header">
-        <div class="terminal-title">DEDICACE MUSIC SYSTEM // MULTI-SOURCE</div>
+        <div class="terminal-title">DEDICACE MUSIC SYSTEM // GITHUB PAGES</div>
         <div class="status-indicators">
-            <div class="status" id="status1">MATRICE: ACTIVE</div>
-            <div class="status" id="status2">SYNC: STABLE</div>
-            <div class="status" id="status3">PWR: 100%</div>
+            <div class="status">MATRICE: ACTIVE</div>
+            <div class="status">SYNC: STABLE</div>
+            <div class="status">PWR: 100%</div>
         </div>
     </div>
 
     <!-- Info du dépôt -->
-    <div class="repo-info" id="repoInfo">
-        📁 Source: Multiple
+    <div class="repo-info">
+        🚀 Déployé sur GitHub Pages
     </div>
 
     <!-- Lecteur musical -->
     <div class="music-player">
-        <div class="music-title" id="musicTitle">♪ Chargement de la playlist... ♪</div>
+        <div class="music-title" id="musicTitle">♪ Dedicace Music System ♪</div>
         
         <div class="playlist-container" id="playlistContainer">
             <!-- La playlist sera générée dynamiquement -->
@@ -720,18 +664,6 @@
             <div class="bar"></div>
             <div class="bar"></div>
         </div>
-        
-        <!-- Section upload pour fichiers locaux -->
-        <div class="upload-section">
-            <input type="file" id="musicUpload" accept="audio/*" multiple style="display: none;">
-            <button class="upload-btn" onclick="document.getElementById('musicUpload').click()">
-                📁 Ajouter fichiers locaux
-            </button>
-        </div>
-        
-        <div class="download-section">
-            <button class="music-btn" id="downloadBtn">💾 TÉLÉCHARGER</button>
-        </div>
     </div>
 
     <div class="debug-info" id="debugInfo">
@@ -757,36 +689,12 @@
         <button class="control-btn" id="togglePlayPause">PAUSE ▐▐</button>
         <button class="control-btn" id="reset">RÉINITIALISER ↺</button>
         <button class="control-btn" id="toggleMatrix">MATRICE ON/OFF</button>
-        <button class="control-btn" id="shuffleBtn">🔀 ALÉATOIRE</button>
-        <button class="control-btn" id="repeatBtn">🔁 RÉPÉTER</button>
-        <button class="control-btn" id="retryBtn">🔄 RÉESSAYER</button>
     </div>
 
     <!-- Élément audio -->
     <audio id="audioPlayer" preload="auto" crossorigin="anonymous"></audio>
     
     <script>
-        // Configuration Multi-Source
-        const CONFIG = {
-            // Sources GitHub avec différents CDN
-            sources: [
-                {
-                    name: "jsDelivr",
-                    baseUrl: "https://cdn.jsdelivr.net/gh/gunout/Dedicace@main/music/"
-                },
-                {
-                    name: "Statically",
-                    baseUrl: "https://cdn.statically.io/gh/gunout/Dedicace/main/music/"
-                },
-                {
-                    name: "RawGit",
-                    baseUrl: "https://raw.githubusercontent.com/gunout/Dedicace/main/music/"
-                }
-            ],
-            currentSourceIndex: 0
-        };
-
-        // Éléments DOM
         const orbitContainer = document.getElementById('orbitContainer');
         const speedUpBtn = document.getElementById('speedUp');
         const slowDownBtn = document.getElementById('slowDown');
@@ -794,18 +702,11 @@
         const togglePlayPauseBtn = document.getElementById('togglePlayPause');
         const resetBtn = document.getElementById('reset');
         const toggleMatrixBtn = document.getElementById('toggleMatrix');
-        const shuffleBtn = document.getElementById('shuffleBtn');
-        const repeatBtn = document.getElementById('repeatBtn');
-        const retryBtn = document.getElementById('retryBtn');
         const debugInfo = document.getElementById('debugInfo');
         const rotatingContent = document.querySelector('.rotating-content');
         const pixelArt = document.getElementById('pixelArt');
         const matrixOverlay = document.getElementById('matrixOverlay');
         const matrixRain = document.getElementById('matrixRain');
-        const repoInfo = document.getElementById('repoInfo');
-        const status1 = document.getElementById('status1');
-        const status2 = document.getElementById('status2');
-        const status3 = document.getElementById('status3');
 
         // Éléments du lecteur musical
         const audioPlayer = document.getElementById('audioPlayer');
@@ -821,15 +722,12 @@
         const visualizer = document.getElementById('visualizer');
         const musicTitle = document.getElementById('musicTitle');
         const playlistContainer = document.getElementById('playlistContainer');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const musicUpload = document.getElementById('musicUpload');
 
         // Éléments de démarrage
         const startOverlay = document.getElementById('startOverlay');
         const startBtn = document.getElementById('startBtn');
         const loadingIndicator = document.getElementById('loadingIndicator');
 
-        // Variables d'état
         let animationSpeed = 20;
         let isReversed = false;
         let isPaused = false;
@@ -839,83 +737,38 @@
         let systemStarted = false;
         let audioContext = null;
         let userInteracted = false;
-        let isShuffle = false;
-        let isRepeat = false;
-        let originalPlaylist = [];
-        let retryCount = 0;
-        let maxRetries = 3;
 
-        // 🎵 PLAYLIST - VOS CHANSONS WEST COST (CORRIGÉE)
+        // 🎵 PLAYLIST GITHUB - REMPLACEZ PAR VOS VRAIES URLS 🎵
         const playlist = [
             {
                 title: "West Cost 70",
-                filename: "West%20Cost%2070.mp3",
-                available: true
+                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2070.mp3"
             },
             {
-                title: "West Cost 71",
-                filename: "West%20Cost%2071.mp3",
-                available: true
+                title: "West Cost 71", 
+                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2071.mp3" 
             },
             {
                 title: "West Cost 72",
-                filename: "West%20Cost%2072.mp3",
-                available: true
+                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2072.mp3"
             },
             {
-                title: "West Cost 73",
-                filename: "West%20Cost%2073.mp3",
-                available: true
+                title: "West Cost 73", 
+                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2073.mp3"
             },
             {
-                title: "West Cost 74",
-                filename: "West%20Cost%2074.mp3",
-                available: true
+                title: "West Cost 74", 
+                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2074.mp3" 
             },
             {
-                title: "West Cost 75",
-                filename: "West%20Cost%2075.mp3",
-                available: true
+                title: "West Cost 75", 
+                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2075.mp3" 
             }
         ];
-
         let currentTrackIndex = 0;
 
         // Caractères pour l'effet matrice
-        const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン♥♡♪♫';
-
-        // Obtenir l'URL actuelle pour une piste
-        function getCurrentTrackUrl(track) {
-            const source = CONFIG.sources[CONFIG.currentSourceIndex];
-            return source.baseUrl + track.filename;
-        }
-
-        // Changer de source CDN
-        function switchSource() {
-            CONFIG.currentSourceIndex = (CONFIG.currentSourceIndex + 1) % CONFIG.sources.length;
-            const source = CONFIG.sources[CONFIG.currentSourceIndex];
-            updateStatus(`Source: ${source.name}`, false);
-            updateRepoInfo();
-            
-            // Recharger les URLs de la playlist
-            playlist.forEach(track => {
-                if (track.available && !track.isLocal) {
-                    track.url = getCurrentTrackUrl(track);
-                }
-            });
-        }
-
-        // Mettre à jour les infos du dépôt
-        function updateRepoInfo() {
-            const source = CONFIG.sources[CONFIG.currentSourceIndex];
-            repoInfo.innerHTML = `📁 Source: ${source.name}`;
-        }
-
-        // Mettre à jour le statut
-        function updateStatus(message, isError = false) {
-            status2.textContent = message;
-            status2.className = isError ? 'status error' : 'status';
-        }
+        const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン♥♡';
 
         // Initialiser l'Audio Context
         function initAudioContext() {
@@ -934,38 +787,18 @@
             playlist.forEach((track, index) => {
                 const item = document.createElement('div');
                 item.className = 'playlist-item';
-                if (!track.available) {
-                    item.classList.add('error');
-                }
                 if (index === currentTrackIndex) {
                     item.classList.add('active');
                 }
-                item.textContent = `${index + 1}. ${track.title}${!track.available ? ' ❌' : ''}`;
+                item.textContent = `${index + 1}. ${track.title}`;
                 item.addEventListener('click', () => {
-                    if (track.available) {
-                        loadTrack(index);
-                        if (!isMusicPlaying) {
-                            toggleMusicPlayPause();
-                        }
+                    loadTrack(index);
+                    if (!isMusicPlaying) {
+                        toggleMusicPlayPause();
                     }
                 });
                 playlistContainer.appendChild(item);
             });
-        }
-
-        // Mélanger la playlist
-        function shufflePlaylist() {
-            if (isShuffle) {
-                for (let i = playlist.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
-                }
-                createPlaylistUI();
-            } else {
-                playlist.length = 0;
-                playlist.push(...originalPlaylist);
-                createPlaylistUI();
-            }
         }
 
         // Fonction pour créer l'effet matrice sur l'image
@@ -997,6 +830,7 @@
 
         // Fonction pour créer l'effet de pluie de code en arrière-plan
         function createMatrixRain() {
+            matrixRain.innerHTML = '';
             const characters = matrixChars;
             const columns = Math.floor(window.innerWidth / 25);
             
@@ -1041,10 +875,7 @@
                 STATUT: ${isPaused ? 'PAUSE' : 'ACTIF'}<br>
                 MATRICE: ${matrixEnabled ? 'ACTIVE' : 'INACTIVE'}<br>
                 MUSIQUE: ${isMusicPlaying ? '▶ LECTURE' : '⏸ PAUSE'}<br>
-                TITRE: ${currentTrackIndex + 1}/${playlist.length}<br>
-                MODE: ${isShuffle ? '🔀 ALÉATOIRE' : '📋 NORMAL'}<br>
-                RÉPÉTER: ${isRepeat ? '🔁 OUI' : '🔁 NON'}<br>
-                SOURCE: ${CONFIG.sources[CONFIG.currentSourceIndex].name}
+                TITRE: ${currentTrackIndex + 1}/${playlist.length}
             `;
         }
 
@@ -1077,42 +908,8 @@
             return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        // Vérifier si une URL est accessible
-        async function checkUrl(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                return response.ok;
-            } catch (error) {
-                return false;
-            }
-        }
-
-        // Retenter avec une autre source
-        async function retryWithDifferentSource() {
-            if (retryCount >= maxRetries) {
-                showError('Toutes les sources ont échoué');
-                return false;
-            }
-            
-            retryCount++;
-            updateStatus(`Tentative ${retryCount}/${maxRetries}...`, false);
-            
-            // Changer de source
-            switchSource();
-            
-            // Attendre un peu
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Réessayer de charger la piste actuelle
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].available) {
-                return await loadTrack(currentTrackIndex, true);
-            }
-            
-            return false;
-        }
-
         async function toggleMusicPlayPause() {
-            if (!userInteracted) {
+            if (!userInteracted || playlist.length === 0) {
                 return;
             }
 
@@ -1137,24 +934,14 @@
                             startProgressUpdate();
                             isMusicPlaying = true;
                             updateDebugInfo();
-                            updateStatus('Lecture en cours', false);
-                        }).catch(async error => {
+                        }).catch(error => {
                             console.error('Erreur lecture audio:', error);
-                            
-                            // Si erreur, essayer une autre source
-                            const success = await retryWithDifferentSource();
-                            if (success) {
-                                await toggleMusicPlayPause();
-                            } else {
-                                showError('Erreur de lecture audio');
-                            }
                         });
                     }
                 }
                 isMusicPlaying = !isMusicPlaying;
             } catch (error) {
                 console.error('Erreur toggle:', error);
-                showError('Erreur du lecteur audio');
             }
         }
 
@@ -1177,34 +964,12 @@
             }
         }
 
-        async function loadTrack(index, isRetry = false) {
-            if (index >= 0 && index < playlist.length && playlist[index].available) {
+        function loadTrack(index) {
+            if (index >= 0 && index < playlist.length) {
                 currentTrackIndex = index;
                 const track = playlist[index];
-                
-                if (!track.url && !track.isLocal) {
-                    track.url = getCurrentTrackUrl(track);
-                }
-                
-                musicTitle.textContent = `♪ Chargement: ${track.title} ♪`;
-                updateStatus('Chargement...', false);
-                
-                // Vérifier si l'URL est accessible
-                if (!track.isLocal) {
-                    const isUrlValid = await checkUrl(track.url);
-                    if (!isUrlValid && !isRetry) {
-                        console.warn('URL non valide, tentative avec autre source...');
-                        const success = await retryWithDifferentSource();
-                        if (!success) {
-                            track.available = false;
-                            createPlaylistUI();
-                            showError('Fichier non disponible');
-                            return;
-                        }
-                    }
-                }
-                
                 audioPlayer.src = track.url;
+                musicTitle.textContent = `♪ ${track.title} ♪`;
                 
                 // Mettre à jour la playlist UI
                 document.querySelectorAll('.playlist-item').forEach((item, i) => {
@@ -1215,71 +980,15 @@
                     }
                 });
                 
-                try {
-                    await audioPlayer.load();
-                    musicTitle.textContent = `♪ ${track.title} ♪`;
-                    updateStatus('Prêt', false);
-                } catch (error) {
-                    console.error('Erreur chargement:', error);
-                    if (!isRetry && !track.isLocal) {
-                        await retryWithDifferentSource();
-                    } else {
-                        track.available = false;
-                        createPlaylistUI();
-                        showError('Échec du chargement');
-                    }
+                if (isMusicPlaying) {
+                    audioPlayer.play().catch(error => {
+                        console.error('Erreur lecture auto:', error);
+                    });
                 }
                 
-                if (isMusicPlaying) {
-                    toggleMusicPlayPause();
-                    setTimeout(() => toggleMusicPlayPause(), 100);
-                }
+                updateDebugInfo();
             }
         }
-
-        function showError(message) {
-            musicTitle.textContent = `❌ ${message}`;
-            updateStatus(message, true);
-            setTimeout(() => {
-                if (playlist[currentTrackIndex] && playlist[currentTrackIndex].available) {
-                    musicTitle.textContent = `♪ ${playlist[currentTrackIndex].title} ♪`;
-                }
-            }, 3000);
-        }
-
-        // Télécharger la playlist
-        function downloadPlaylist() {
-            const playlistText = playlist.map((track, index) => 
-                `${index + 1}. ${track.title}${!track.available ? ' (Indisponible)' : ''}\nURL: ${track.url || 'N/A'}`
-            ).join('\n\n');
-            
-            const blob = new Blob([playlistText], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'playlist-west-cost.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Gérer l'upload de fichiers locaux
-        musicUpload.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            
-            files.forEach(file => {
-                const url = URL.createObjectURL(file);
-                playlist.push({
-                    title: file.name.replace(/\.[^/.]+$/, ""),
-                    filename: file.name,
-                    url: url,
-                    available: true,
-                    isLocal: true
-                });
-            });
-            
-            createPlaylistUI();
-            updateStatus(`${files.length} fichier(s) ajouté(s)`, false);
-        });
 
         // Démarrage du système
         async function startSystem() {
@@ -1289,15 +998,6 @@
             loadingIndicator.style.display = 'block';
             
             initAudioContext();
-            
-            // Initialiser les URLs de la playlist
-            playlist.forEach(track => {
-                if (!track.isLocal) {
-                    track.url = getCurrentTrackUrl(track);
-                }
-            });
-            originalPlaylist = [...playlist];
-            updateRepoInfo();
             
             // Créer la playlist
             createPlaylistUI();
@@ -1312,16 +1012,11 @@
             audioPlayer.volume = 0.8;
             visualizer.style.display = 'none';
             
-            // Charger la première piste disponible
-            const firstAvailableTrack = playlist.findIndex(track => track.available);
-            if (firstAvailableTrack !== -1) {
-                await loadTrack(firstAvailableTrack);
-            }
-            
-            // Précharger l'audio
-            try {
-                await audioPlayer.load();
+            // Charger la première piste
+            if (playlist.length > 0) {
+                loadTrack(0);
                 
+                // Essayer de démarrer la lecture automatiquement
                 setTimeout(async () => {
                     loadingIndicator.style.display = 'none';
                     try {
@@ -1332,15 +1027,13 @@
                         visualizer.style.display = 'flex';
                         startProgressUpdate();
                         updateDebugInfo();
-                        updateStatus('Lecture en cours', false);
                     } catch (error) {
-                        console.error('Erreur démarrage audio:', error);
-                        updateStatus('Prêt', false);
+                        console.log('Lecture auto bloquée, nécessite interaction utilisateur');
                         updateDebugInfo();
                     }
                 }, 1000);
-            } catch (error) {
-                loadingIndicator.textContent = 'Erreur de chargement audio';
+            } else {
+                loadingIndicator.textContent = 'Aucune musique dans la playlist';
                 setTimeout(() => {
                     loadingIndicator.style.display = 'none';
                 }, 3000);
@@ -1351,40 +1044,20 @@
         musicPlayPauseBtn.addEventListener('click', toggleMusicPlayPause);
 
         musicPrevBtn.addEventListener('click', () => {
-            let prevIndex = currentTrackIndex - 1;
-            while (prevIndex >= 0 && !playlist[prevIndex].available) {
-                prevIndex--;
-            }
-            if (prevIndex >= 0) {
-                loadTrack(prevIndex);
+            if (playlist.length === 0) return;
+            if (currentTrackIndex > 0) {
+                loadTrack(currentTrackIndex - 1);
             } else {
-                // Trouver la dernière piste disponible
-                let lastAvailable = playlist.length - 1;
-                while (lastAvailable >= 0 && !playlist[lastAvailable].available) {
-                    lastAvailable--;
-                }
-                if (lastAvailable >= 0) {
-                    loadTrack(lastAvailable);
-                }
+                loadTrack(playlist.length - 1);
             }
         });
 
         musicNextBtn.addEventListener('click', () => {
-            let nextIndex = currentTrackIndex + 1;
-            while (nextIndex < playlist.length && !playlist[nextIndex].available) {
-                nextIndex++;
-            }
-            if (nextIndex < playlist.length) {
-                loadTrack(nextIndex);
+            if (playlist.length === 0) return;
+            if (currentTrackIndex < playlist.length - 1) {
+                loadTrack(currentTrackIndex + 1);
             } else {
-                // Trouver la première piste disponible
-                let firstAvailable = 0;
-                while (firstAvailable < playlist.length && !playlist[firstAvailable].available) {
-                    firstAvailable++;
-                }
-                if (firstAvailable < playlist.length) {
-                    loadTrack(firstAvailable);
-                }
+                loadTrack(0);
             }
         });
 
@@ -1415,36 +1088,27 @@
         });
 
         audioPlayer.addEventListener('ended', () => {
-            if (isRepeat) {
-                loadTrack(currentTrackIndex);
-                setTimeout(() => toggleMusicPlayPause(), 500);
-            } else if (isShuffle) {
-                let nextIndex;
-                do {
-                    nextIndex = Math.floor(Math.random() * playlist.length);
-                } while (!playlist[nextIndex].available && nextIndex !== currentTrackIndex);
-                
-                if (playlist[nextIndex].available) {
-                    loadTrack(nextIndex);
-                    setTimeout(() => toggleMusicPlayPause(), 500);
-                }
+            // Passer automatiquement au titre suivant
+            if (currentTrackIndex < playlist.length - 1) {
+                loadTrack(currentTrackIndex + 1);
+                setTimeout(() => {
+                    if (isMusicPlaying) {
+                        audioPlayer.play();
+                    }
+                }, 500);
             } else {
-                musicNextBtn.click();
+                loadTrack(0);
+                setTimeout(() => {
+                    if (isMusicPlaying) {
+                        audioPlayer.play();
+                    }
+                }, 500);
             }
         });
 
-        audioPlayer.addEventListener('error', async (e) => {
+        audioPlayer.addEventListener('error', (e) => {
             console.error('Erreur audio:', e.target.error);
-            if (!playlist[currentTrackIndex].isLocal) {
-                const success = await retryWithDifferentSource();
-                if (!success) {
-                    if (playlist[currentTrackIndex]) {
-                        playlist[currentTrackIndex].available = false;
-                        createPlaylistUI();
-                    }
-                    showError('Fichier audio non disponible');
-                }
-            }
+            musicTitle.textContent = '❌ Erreur de chargement audio';
         });
 
         // Événements de démarrage
@@ -1486,30 +1150,6 @@
 
         toggleMatrixBtn.addEventListener('click', toggleMatrixEffect);
 
-        shuffleBtn.addEventListener('click', () => {
-            isShuffle = !isShuffle;
-            shuffleBtn.classList.toggle('active');
-            shufflePlaylist();
-            updateDebugInfo();
-        });
-
-        repeatBtn.addEventListener('click', () => {
-            isRepeat = !isRepeat;
-            repeatBtn.classList.toggle('active');
-            updateDebugInfo();
-        });
-
-        retryBtn.addEventListener('click', async () => {
-            retryCount = 0;
-            updateStatus('Nouvelle tentative...', false);
-            await retryWithDifferentSource();
-            if (playlist[currentTrackIndex] && playlist[currentTrackIndex].available) {
-                await loadTrack(currentTrackIndex);
-            }
-        });
-
-        downloadBtn.addEventListener('click', downloadPlaylist);
-
         // Détecter les interactions utilisateur
         document.addEventListener('click', () => {
             if (!userInteracted) {
@@ -1523,7 +1163,7 @@
             }
         }, { once: true });
 
-        // Redimensionnement de la matrice quand la fenêtre change
+        // Redimensionnement
         window.addEventListener('resize', () => {
             matrixRain.innerHTML = '';
             createMatrixRain();
@@ -1535,9 +1175,13 @@
             document.body.classList.add('touch-device');
         }
 
-        // Initialisation au chargement
-        document.addEventListener('DOMContentLoaded', () => {
-            updateDebugInfo();
+        // Debug des événements audio
+        audioPlayer.addEventListener('loadstart', function() {
+            console.log('🔄 Début du chargement:', audioPlayer.src);
+        });
+
+        audioPlayer.addEventListener('canplay', function() {
+            console.log('✅ Audio prêt à jouer:', audioPlayer.src);
         });
     </script>
 </body>
