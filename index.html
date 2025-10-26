@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Art ASCII Matrice - Dedicace Music System</title>
+    <title>Art ASCII Matrice - BEATSTREET</title>
     <style>
         * {
             margin: 0;
@@ -603,20 +603,20 @@
     <!-- Overlay de démarrage -->
     <div class="start-overlay" id="startOverlay">
         <div class="start-message">
-            DEDICACE MUSIC SYSTEM<br>
-            ♪ GitHub Pages Edition ♪<br>
+            BEATSTREET MUSIC SYSTEM<br>
+            ♪ Auto-détection des MP3 ♪<br>
             <span style="font-size: clamp(12px, 4vw, 14px);">Cliquez pour démarrer l'expérience</span>
         </div>
         <button class="start-btn" id="startBtn">▶ DÉMARRER</button>
         <div class="loading-indicator" id="loadingIndicator" style="display: none;">
-            Chargement de la playlist...
+            Scan du dossier music/...
         </div>
     </div>
 
     <div class="matrix-rain" id="matrixRain"></div>
     
     <div class="terminal-header">
-        <div class="terminal-title">DEDICACE MUSIC SYSTEM // GITHUB PAGES</div>
+        <div class="terminal-title">BEATSTREET MUSIC SYSTEM // AUTO-DETECTION MP3</div>
         <div class="status-indicators">
             <div class="status">MATRICE: ACTIVE</div>
             <div class="status">SYNC: STABLE</div>
@@ -624,14 +624,14 @@
         </div>
     </div>
 
-    <!-- Info du dépôt -->
+    <!-- Info du serveur -->
     <div class="repo-info">
-        🚀 Déployé sur GitHub Pages
+        📁 Serveur: http://localhost:8000
     </div>
 
     <!-- Lecteur musical -->
     <div class="music-player">
-        <div class="music-title" id="musicTitle">♪ Dedicace Music System ♪</div>
+        <div class="music-title" id="musicTitle">♪ Scan des fichiers MP3... ♪</div>
         
         <div class="playlist-container" id="playlistContainer">
             <!-- La playlist sera générée dynamiquement -->
@@ -738,37 +738,64 @@
         let audioContext = null;
         let userInteracted = false;
 
-        // 🎵 PLAYLIST GITHUB - REMPLACEZ PAR VOS VRAIES URLS 🎵
-        const playlist = [
-            {
-                title: "West Cost 70",
-                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2070.mp3"
-            },
-            {
-                title: "West Cost 71", 
-                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2071.mp3" 
-            },
-            {
-                title: "West Cost 72",
-                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2072.mp3"
-            },
-            {
-                title: "West Cost 73", 
-                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2073.mp3"
-            },
-            {
-                title: "West Cost 74", 
-                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2074.mp3" 
-            },
-            {
-                title: "West Cost 75", 
-                url: "https://raw.githubusercontent.com/gunout/Gleaphe-Instrus/main/music/West%20Cost%2075.mp3" 
-            }
-        ];
+        // 🎵 PLAYLIST AUTO-DÉTECTION 🎵
+        let playlist = [];
         let currentTrackIndex = 0;
 
         // Caractères pour l'effet matrice
         const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン♥♡';
+
+        // Fonction pour charger la playlist depuis le serveur
+        async function loadPlaylistFromServer() {
+            try {
+                loadingIndicator.style.display = 'block';
+                loadingIndicator.textContent = 'Scan des fichiers MP3...';
+                
+                const response = await fetch('/api/music');
+                if (!response.ok) {
+                    throw new Error('Erreur API: ' + response.status);
+                }
+                
+                const files = await response.json();
+                
+                if (files.length === 0) {
+                    musicTitle.textContent = '❌ Aucun fichier MP3 trouvé dans /music/';
+                    loadingIndicator.textContent = 'Ajoutez des MP3 dans le dossier music/';
+                    return false;
+                }
+                
+                // Créer la playlist
+                playlist = files.map(file => ({
+                    title: file.name,
+                    url: file.url
+                }));
+                
+                createPlaylistUI();
+                loadingIndicator.textContent = `${playlist.length} chansons détectées !`;
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Erreur chargement playlist:', error);
+                musicTitle.textContent = '❌ Erreur de scan MP3';
+                loadingIndicator.textContent = 'Vérifiez le serveur et le dossier music/';
+                return false;
+            }
+        }
+
+        // Playlist de secours si l'API ne fonctionne pas
+        function setupFallbackPlaylist() {
+            playlist = [
+                { title: "West Cost 70", url: "music/West Cost 70.mp3" },
+                { title: "West Cost 71", url: "music/West Cost 71.mp3" },
+                { title: "West Cost 72", url: "music/West Cost 72.mp3" },
+                { title: "West Cost 73", url: "music/West Cost 73.mp3" },
+                { title: "West Cost 74", url: "music/West Cost 74.mp3" },
+                { title: "West Cost 75", url: "music/West Cost 75.mp3" }
+            ];
+            createPlaylistUI();
+            musicTitle.textContent = '♪ Mode secours activé ♪';
+        }
 
         // Initialiser l'Audio Context
         function initAudioContext() {
@@ -999,8 +1026,13 @@
             
             initAudioContext();
             
-            // Créer la playlist
-            createPlaylistUI();
+            // Charger la playlist automatiquement
+            const success = await loadPlaylistFromServer();
+            
+            if (!success) {
+                // Fallback vers la playlist manuelle
+                setupFallbackPlaylist();
+            }
             
             // Initialiser les effets visuels
             createMatrixEffect();
@@ -1012,7 +1044,7 @@
             audioPlayer.volume = 0.8;
             visualizer.style.display = 'none';
             
-            // Charger la première piste
+            // Charger la première piste si disponible
             if (playlist.length > 0) {
                 loadTrack(0);
                 
@@ -1033,7 +1065,7 @@
                     }
                 }, 1000);
             } else {
-                loadingIndicator.textContent = 'Aucune musique dans la playlist';
+                loadingIndicator.textContent = 'Aucun MP3 trouvé - Ajoutez des fichiers';
                 setTimeout(() => {
                     loadingIndicator.style.display = 'none';
                 }, 3000);
