@@ -22,6 +22,7 @@
             justify-content: center;
             overflow-x: hidden;
             position: relative;
+            padding-top: 50px; /* Espace pour le header fixe */
         }
 
         /* Effet de scanlines */
@@ -55,6 +56,9 @@
         }
 
         .terminal-header {
+            position: fixed; /* Changé de relative à fixed */
+            top: 0; /* Positionné tout en haut */
+            left: 0;
             width: 100%;
             background: #1a0011;
             padding: 8px 15px;
@@ -63,7 +67,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
-            z-index: 10;
+            z-index: 100; /* Augmenté pour être au-dessus de tout */
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -261,7 +265,7 @@
         /* Lecteur musical amélioré */
         .music-player {
             position: fixed;
-            top: 100px;
+            top: 60px; /* Ajusté pour être juste en dessous du header */
             left: 10px;
             background: rgba(20, 0, 11, 0.9);
             border: 1px solid #ff69b4;
@@ -500,7 +504,7 @@
 
         .repo-info {
             position: fixed;
-            top: 55px;
+            top: 35px; /* Ajusté pour être juste en dessous du header */
             left: 50%;
             transform: translateX(-50%);
             background: rgba(20, 0, 11, 0.9);
@@ -530,7 +534,7 @@
             }
 
             .music-player {
-                top: 85px;
+                top: 50px; /* Ajusté pour mobile */
                 left: 5px;
                 right: 5px;
                 width: calc(100% - 10px);
@@ -569,7 +573,7 @@
             }
 
             .music-player {
-                top: 75px;
+                top: 45px; /* Ajusté pour petits écrans */
                 max-height: 50vh;
             }
 
@@ -589,7 +593,7 @@
             }
 
             .music-player {
-                top: 60px;
+                top: 40px; /* Ajusté pour mode paysage */
                 max-height: 40vh;
             }
 
