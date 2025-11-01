@@ -28,9 +28,14 @@ class MusicRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error(404, "Music directory not found")
             return
         
-        # Servir index.html pour la racine
+        # Servir index(1).html pour la racine
         elif self.path == '/' or self.path == '/index.html':
-            self.path = '/index.html'
+            # Vérifier si index(1).html existe
+            if os.path.exists('index(1).html'):
+                self.path = '/index(1).html'
+            else:
+                # Fallback vers index.html normal
+                self.path = '/index.html'
             return super().do_GET()
                 
         # Servir les autres fichiers normalement
@@ -48,8 +53,8 @@ if __name__ == "__main__":
         os.makedirs('music')
         print("📁 Dossier 'music' créé - Ajoutez vos fichiers MP3 dedans")
     
-    # Créer un index.html basique s'il n'existe pas
-    if not os.path.exists('index.html'):
+    # Vérifier si index(1).html existe, sinon créer un index.html basique
+    if not os.path.exists('index(1).html') and not os.path.exists('index.html'):
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write('''<!DOCTYPE html>
 <html lang="fr">
@@ -107,6 +112,10 @@ if __name__ == "__main__":
 </html>''')
         print("📄 Fichier index.html créé automatiquement")
     
+    # Message spécial si index(1).html existe
+    if os.path.exists('index(1).html'):
+        print("🎨 Interface BEATSTREET détectée (index(1).html)")
+    
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
     with socketserver.TCPServer(("", PORT), MusicRequestHandler) as httpd:
@@ -114,6 +123,10 @@ if __name__ == "__main__":
         print("📁 Dossier musique: http://localhost:8000/music/")
         print("🎵 API musique: http://localhost:8000/api/music")
         print("📄 Interface web: http://localhost:8000/")
+        
+        if os.path.exists('index(1).html'):
+            print("🚀 Interface BEATSTREET: http://localhost:8000/")
+        
         print("🛑 Arrêtez avec Ctrl+C")
         
         try:
