@@ -22,12 +22,16 @@ class MusicRequestHandler(http.server.SimpleHTTPRequestHandler):
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
                 self.wfile.write(json.dumps(files).encode())
             else:
                 self.send_error(404, "Music directory not found")
             return
+        
+        # Servir index.html pour la racine
+        elif self.path == '/' or self.path == '/index.html':
+            self.path = '/index.html'
+            return super().do_GET()
                 
         # Servir les autres fichiers normalement
         super().do_GET()
@@ -43,6 +47,65 @@ if __name__ == "__main__":
     if not os.path.exists('music'):
         os.makedirs('music')
         print("📁 Dossier 'music' créé - Ajoutez vos fichiers MP3 dedans")
+    
+    # Créer un index.html basique s'il n'existe pas
+    if not os.path.exists('index.html'):
+        with open('index.html', 'w', encoding='utf-8') as f:
+            f.write('''<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serveur Musique</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f0f0f0; }
+        .player { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        audio { width: 100%; margin: 20px 0; }
+        .playlist { list-style: none; padding: 0; }
+        .playlist li { padding: 10px; margin: 5px 0; background: #e0e0e0; border-radius: 5px; cursor: pointer; }
+        .playlist li:hover { background: #d0d0d0; }
+    </style>
+</head>
+<body>
+    <div class="player">
+        <h1>🎵 Mon Serveur Musique</h1>
+        <audio id="audioPlayer" controls></audio>
+        <h3>Playlist:</h3>
+        <ul id="playlist" class="playlist"></ul>
+    </div>
+
+    <script>
+        async function loadPlaylist() {
+            try {
+                const response = await fetch('/api/music');
+                const musicList = await response.json();
+                const playlist = document.getElementById('playlist');
+                const audioPlayer = document.getElementById('audioPlayer');
+
+                musicList.forEach(music => {
+                    const li = document.createElement('li');
+                    li.textContent = music.name;
+                    li.onclick = () => {
+                        audioPlayer.src = music.url;
+                        audioPlayer.play();
+                    };
+                    playlist.appendChild(li);
+                });
+
+                if (musicList.length > 0) {
+                    audioPlayer.src = musicList[0].url;
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('playlist').innerHTML = '<li>Erreur de chargement</li>';
+            }
+        }
+
+        loadPlaylist();
+    </script>
+</body>
+</html>''')
+        print("📄 Fichier index.html créé automatiquement")
     
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
